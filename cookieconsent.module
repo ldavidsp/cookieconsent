@@ -1,0 +1,131 @@
+<?php
+/**
+ * @file
+ * A description of what your module does.
+ */
+
+/**
+ *  Implements hook_menu().
+ */
+function cookieconsent_menu() {
+  $items['admin/config/system/cookieconsent'] = [
+    'title' => 'Coockie Consent',
+    'description' => 'Coockie Consent for Drupal',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['coockieconsent_admin'],
+    'access arguments' => ['administer configure cookieconsent'],
+    'file' => 'includes/cookieconsent.admin.inc',
+  ];
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function cookieconsent_permission() {
+  return [
+    'administer cookieconsent settings' => [
+      'title' => t('Administer CookieConsent Settings'),
+      'description' => t('Administer the CookieConsent settings to control the appearance of the popup'),
+    ],
+  ];
+}
+
+/**
+ * Implements hook_page_alter().
+ */
+function cookieconsent_page_alter(&$page) {
+  cookieconsent_page_build($page);
+}
+
+/**
+ * Implements hook_page_build().
+ */
+function cookieconsent_page_build(&$page) {
+  $cookieconsent = [];
+  $position = variable_get('cookieconsent_select_position');
+  $radios_layout = variable_get('cookieconsent_radios_layout');
+  $link_privacy = variable_get('cookieconsent_link');
+  $message = variable_get('cookieconsent_message');
+  $button_dismiss = variable_get('cookieconsent_dismiss');
+  $learn_police = variable_get('cookieconsent_police');
+  $banner_color = variable_get('cookieconsent_color_banner');
+  $banner_color_text = variable_get('cookieconsent_color_banner_text');
+  $button_color = variable_get('cookieconsent_color_button');
+  $button_color_text = variable_get('cookieconsent_color_button_text');
+
+
+  //Cookie position
+  if ($position != 'bottom') {
+    $cookieconsent['position'] = $position;
+  }
+
+  //Cookie layouts
+  switch ($radios_layout) {
+    case 'edgeless':
+      $cookieconsent['theme'] = 'edgeless';
+      break;
+
+    case 'classic':
+      $cookieconsent['theme'] = 'classic';
+      break;
+
+    case 'wire':
+      $cookieconsent['palette']['button'] = [
+        'background' => 'transparent',
+        'text' => $button_color,
+        'border' => $button_color,
+      ];
+      break;
+
+    default:
+
+  }
+
+  // Cookie palette
+  if (isset($banner_color) && isset($banner_color_text)) {
+    $cookieconsent['palette']['popup'] = [
+      'background' => $banner_color,
+      'text' => $banner_color_text,
+    ];
+  }
+
+  if ($radios_layout != 'wire') {
+    if (isset($button_color) && isset($button_color_text)) {
+      $cookieconsent['palette']['button'] = [
+        'background' => $button_color,
+        'text' => $button_color_text,
+      ];
+    }
+  }
+
+  //Cookie learn link
+  if (isset($link_privacy)) {
+    $cookieconsent['content'] = [
+      'href' => $link_privacy,
+    ];
+  }
+
+  //Cookie message
+  if (isset($message)) {
+    $cookieconsent['content'] = [
+      'message' => $message,
+    ];
+  }
+
+  //Cookie button dismiss
+  if (isset($button_dismiss)) {
+    $cookieconsent['content']['dismiss'] = $button_dismiss;
+  }
+
+  //Cookie learn link
+  if (isset($learn_police)) {
+    $cookieconsent['content']['link'] = $learn_police;
+  }
+
+  drupal_add_css('//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css', 'external');
+  drupal_add_js('//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js', 'external');
+  drupal_add_js(drupal_get_path('module', 'cookieconsent') . '/assets/js/cookieconsent.js');
+  drupal_add_js(['cookieconsent' => $cookieconsent], 'setting');
+}

@@ -1,0 +1,9 @@
+name = Coockie Consent
+description = Coockie Consent for Drupal
+core = 7.x
+
+; Information added by Drupal.org packaging script on 2019-01-10
+version = "7.x-1.0"
+core = "7.x"
+project = "cookie_consent"
+configure = admin/config/system/cookieconsent
